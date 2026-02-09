@@ -1022,6 +1022,32 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      case 'forceRestart': {
+        const room = rooms.get(roomCode);
+        if (!room) return;
+        if (playerId !== room.hostId) {
+          ws.send(JSON.stringify({ type: 'error', message: '只有房主可以重新开始' }));
+          return;
+        }
+        // Reset to waiting state so host can start fresh
+        room.state = 'waiting';
+        for (const p of room.players) {
+          p.hand = [];
+          p.bet = 0;
+          p.totalBet = 0;
+          p.folded = false;
+          p.allIn = false;
+          if (p.chips <= 0) p.chips = 1000; // auto rebuy
+        }
+        room.communityCards = [];
+        room.pot = 0;
+        room.currentBet = 0;
+        room.round = '';
+        room.broadcast({ type: 'newHand' });
+        room.broadcastState();
+        break;
+      }
+
       case 'chat': {
         const room = rooms.get(roomCode);
         if (!room) return;

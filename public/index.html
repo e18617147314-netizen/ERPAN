@@ -617,6 +617,8 @@ body {
       <button class="btn btn-small btn-primary" id="settingsBtn" onclick="toggleSettings()" style="display:none;">设置</button>
       <button class="btn btn-small btn-accent" id="startBtn" onclick="startGame()" style="display:none;">开始游戏</button>
       <button class="btn btn-small btn-accent" id="nextHandBtn" onclick="nextHand()" style="display:none;">下一手</button>
+      <button class="btn btn-small btn-accent" id="restartBtn" onclick="forceRestart()" style="display:none;">重新开始</button>
+      <button class="btn btn-small btn-danger" id="leaveBtn" onclick="leaveRoom()">退出房间</button>
     </div>
   </div>
 
@@ -664,7 +666,7 @@ body {
   </div>
 
   <!-- Results overlay -->
-  <div class="overlay" id="resultsOverlay">
+  <div class="overlay" id="resultsOverlay" onclick="if(event.target===this)this.classList.remove('show')">
     <div class="overlay-content" id="resultsContent"></div>
   </div>
 
@@ -832,6 +834,7 @@ function renderGame() {
   const isWaiting = state === 'waiting' || state === 'showdown';
   document.getElementById('startBtn').style.display = (isHost && state === 'waiting') ? 'inline-block' : 'none';
   document.getElementById('nextHandBtn').style.display = (isHost && state === 'showdown') ? 'inline-block' : 'none';
+  document.getElementById('restartBtn').style.display = (isHost && state === 'playing') ? 'inline-block' : 'none';
   document.getElementById('settingsBtn').style.display = isHost ? 'inline-block' : 'none';
   document.getElementById('chatInputArea').style.display = 'flex';
 
@@ -960,7 +963,7 @@ function renderActionBar() {
   const me = gameState.players.find(p => p.isMe);
   if (!me) return;
 
-  const isMyTurn = me.originalIndex === gameState.currentPlayerIndex;
+  const isMyTurn = gameState.myIndex === gameState.currentPlayerIndex;
   if (!isMyTurn || me.folded || me.allIn) {
     document.getElementById('actionBar').classList.remove('show');
     return;
@@ -1054,6 +1057,18 @@ function copyRoomCode() {
   if (myRoomCode) {
     navigator.clipboard.writeText(myRoomCode).then(() => showToast('房间号已复制'));
   }
+}
+
+function leaveRoom() {
+  if (!confirm('确定退出房间？')) return;
+  sessionStorage.clear();
+  if (ws) ws.close();
+  location.reload();
+}
+
+function forceRestart() {
+  if (!confirm('强制重新开始当前牌局？')) return;
+  ws.send(JSON.stringify({ type: 'forceRestart' }));
 }
 
 // ============================================================
