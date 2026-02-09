@@ -1,0 +1,20 @@
+{
+  "name": "texas-holdem",
+  "version": "1.0.0",
+  "description": "Multiplayer Texas Hold'em Poker with provably fair dealing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:43053/git/e18617147314-netizen/ERPAN"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^8.19.0"
+  }
+}
